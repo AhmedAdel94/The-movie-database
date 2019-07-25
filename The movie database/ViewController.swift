@@ -12,6 +12,9 @@ class ViewController: UITableViewController,UISearchResultsUpdating {
     
     var movies = [Movie]()
     //var moviesNames = [String]()
+    var recentSearch = [String]()
+    var name = String()
+    var page = 1
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -27,11 +30,25 @@ class ViewController: UITableViewController,UISearchResultsUpdating {
         navigationItem.hidesSearchBarWhenScrolling = false
         definesPresentationContext = true
         
-        
     }
     
     func updateSearchResults(for searchController: UISearchController) {
         guard let text = searchController.searchBar.text else { return }
+        name = text
+        
+        if recentSearch.count < 10{
+            recentSearch.append(text)
+        }else{
+            recentSearch.remove(at: 0)
+            recentSearch.append(text)
+        }
+        
+        makeUrl(text: text, page: 1)
+
+    }
+    
+    func makeUrl(text:String , page:Int)
+    {
         let urlString : String
         
         urlString = "https://api.themoviedb.org/3/search/movie?api_key=b3070a5d3abfb7c241d2688d066914e7&query=\(text)&page=1"
@@ -47,7 +64,6 @@ class ViewController: UITableViewController,UISearchResultsUpdating {
             }
             //self.showError()
         }
-
     }
     
     func parse(json:Data)
@@ -99,16 +115,5 @@ class ViewController: UITableViewController,UISearchResultsUpdating {
         performSegue(withIdentifier: "showDetails", sender: movie)
     }
     
-//    func setupNavbar()
-//    {
-//        let searchController = UISearchController(searchResultsController: nil)
-//        navigationItem.searchController = searchController
-//        navigationItem.hidesSearchBarWhenScrolling = false
-//
-//    }
-    
-    
-
-
 }
 
