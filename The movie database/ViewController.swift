@@ -8,7 +8,7 @@
 
 import UIKit
 
-class ViewController: UITableViewController {
+class ViewController: UITableViewController,UISearchResultsUpdating {
     
     var movies = [Movie]()
     //var moviesNames = [String]()
@@ -16,10 +16,25 @@ class ViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
+        //setupNavbar()
         
+        let searchController = UISearchController(searchResultsController: nil)
+        
+        searchController.searchResultsUpdater = self
+        searchController.obscuresBackgroundDuringPresentation = false
+        searchController.searchBar.placeholder = "Search Movies"
+        navigationItem.searchController = searchController
+        navigationItem.hidesSearchBarWhenScrolling = false
+        definesPresentationContext = true
+        
+        
+    }
+    
+    func updateSearchResults(for searchController: UISearchController) {
+        guard let text = searchController.searchBar.text else { return }
         let urlString : String
         
-        urlString = "https://api.themoviedb.org/3/search/movie?api_key=b3070a5d3abfb7c241d2688d066914e7&query=Rocky&page=1"
+        urlString = "https://api.themoviedb.org/3/search/movie?api_key=b3070a5d3abfb7c241d2688d066914e7&query=\(text)&page=1"
         
         DispatchQueue.global(qos: .userInitiated).async {
             if let url = URL(string: urlString) // use if let to make sure url is valid
@@ -30,8 +45,9 @@ class ViewController: UITableViewController {
                     return
                 }
             }
-            self.showError()
+            //self.showError()
         }
+
     }
     
     func parse(json:Data)
@@ -83,7 +99,13 @@ class ViewController: UITableViewController {
         performSegue(withIdentifier: "showDetails", sender: movie)
     }
     
-    
+//    func setupNavbar()
+//    {
+//        let searchController = UISearchController(searchResultsController: nil)
+//        navigationItem.searchController = searchController
+//        navigationItem.hidesSearchBarWhenScrolling = false
+//
+//    }
     
     
 
