@@ -38,6 +38,7 @@ class ViewController: UITableViewController,UISearchResultsUpdating {
     func updateSearchResults(for searchController: UISearchController) {
         guard let text = searchController.searchBar.text else { return }
         name = text
+        movies = []
         
         if recentSearch.count < 10{
             recentSearch.append(text)
@@ -123,22 +124,6 @@ class ViewController: UITableViewController,UISearchResultsUpdating {
         performSegue(withIdentifier: "showDetails", sender: movie)
     }
     
-//    func scrollViewDidScroll(scrollView: UIScrollView) {
-//        let contentOffset = scrollView.contentOffset.y
-//        let maximumOffset = scrollView.contentSize.height - scrollView.frame.size.height;
-//
-//        if !isLoadingMore && (maximumOffset - contentOffset <= threshold) {
-//            // Get more data - API call
-//            self.isLoadingMore = true
-//
-//            // Update UI
-//            dispatch_async(dispatch_get_main_queue()) {
-//                tableView.reloadData()
-//                self.isLoadingMore = false
-//            }
-//        }
-//    }
-    
     override func scrollViewDidScroll(_ scrollView: UIScrollView) {
         let height = scrollView.frame.size.height
         let contentYoffset = scrollView.contentOffset.y
@@ -148,6 +133,7 @@ class ViewController: UITableViewController,UISearchResultsUpdating {
             makeUrl(text: name, page: page)
         }
     }
+
     
 }
 
