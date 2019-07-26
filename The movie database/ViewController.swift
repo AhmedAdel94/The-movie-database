@@ -15,6 +15,9 @@ class ViewController: UITableViewController,UISearchResultsUpdating {
     var recentSearch = [String]()
     var name = String()
     var page = 1
+    
+    let threshold = 100.0 // threshold from bottom of tableView
+    var isLoadingMore = false // flag
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -51,7 +54,7 @@ class ViewController: UITableViewController,UISearchResultsUpdating {
     {
         let urlString : String
         
-        urlString = "https://api.themoviedb.org/3/search/movie?api_key=b3070a5d3abfb7c241d2688d066914e7&query=\(text)&page=1"
+        urlString = "https://api.themoviedb.org/3/search/movie?api_key=b3070a5d3abfb7c241d2688d066914e7&query=\(text)&page=\(page)"
         
         DispatchQueue.global(qos: .userInitiated).async {
             if let url = URL(string: urlString) // use if let to make sure url is valid
@@ -72,11 +75,16 @@ class ViewController: UITableViewController,UISearchResultsUpdating {
         //print(json)
 
         if let jsonMovies = try? decoder.decode(Movies.self, from: json){
-            movies = jsonMovies.results
+            movies += jsonMovies.results
             
             DispatchQueue.main.async {
                 [weak self] in
                 self?.tableView.reloadData()
+                if self?.movies.count == 0{
+                    let AC = UIAlertController(title: "No movie", message: "Can't find this movie , please check the name", preferredStyle: .alert)
+                    AC.addAction(UIAlertAction(title: "OK", style: .default))
+                    self?.present(AC,animated: true)
+                }
             }
         }
     }
@@ -113,6 +121,32 @@ class ViewController: UITableViewController,UISearchResultsUpdating {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let movie = movies[indexPath.row]
         performSegue(withIdentifier: "showDetails", sender: movie)
+    }
+    
+//    func scrollViewDidScroll(scrollView: UIScrollView) {
+//        let contentOffset = scrollView.contentOffset.y
+//        let maximumOffset = scrollView.contentSize.height - scrollView.frame.size.height;
+//
+//        if !isLoadingMore && (maximumOffset - contentOffset <= threshold) {
+//            // Get more data - API call
+//            self.isLoadingMore = true
+//
+//            // Update UI
+//            dispatch_async(dispatch_get_main_queue()) {
+//                tableView.reloadData()
+//                self.isLoadingMore = false
+//            }
+//        }
+//    }
+    
+    override func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        let height = scrollView.frame.size.height
+        let contentYoffset = scrollView.contentOffset.y
+        let distanceFromBottom = scrollView.contentSize.height - contentYoffset
+        if distanceFromBottom < height {
+            page += 1
+            makeUrl(text: name, page: page)
+        }
     }
     
 }
