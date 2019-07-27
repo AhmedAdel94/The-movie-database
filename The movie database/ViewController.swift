@@ -12,7 +12,7 @@ class ViewController: UITableViewController,UISearchResultsUpdating {
     
     var movies = [Movie]()
     //var moviesNames = [String]()
-    var recentSearch = [String]()
+    var recentSearch = [Movie]()
     var name = String()
     var page = 1
     
@@ -39,13 +39,15 @@ class ViewController: UITableViewController,UISearchResultsUpdating {
         guard let text = searchController.searchBar.text else { return }
         name = text
         movies = []
-        
-        if recentSearch.count < 10{
-            recentSearch.append(text)
-        }else{
-            recentSearch.remove(at: 0)
-            recentSearch.append(text)
+        if text == ""{
+            movies = recentSearch
+            DispatchQueue.main.async {
+                [weak self] in
+                self?.tableView.reloadData()
+            }
         }
+        
+        
         
         makeUrl(text: text, page: 1)
 
@@ -85,6 +87,8 @@ class ViewController: UITableViewController,UISearchResultsUpdating {
                     let AC = UIAlertController(title: "No movie", message: "Can't find this movie , please check the name", preferredStyle: .alert)
                     AC.addAction(UIAlertAction(title: "OK", style: .default))
                     self?.present(AC,animated: true)
+                }else{
+//                    self?.recentSearch.append((self?.movies[0])!)
                 }
             }
         }
@@ -108,7 +112,6 @@ class ViewController: UITableViewController,UISearchResultsUpdating {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell",for:indexPath)
         let movie = movies[indexPath.row]
         cell.textLabel?.text = movie.title
-        //cell.detailTextLabel?.text = petition.body
         return cell
     }
     
@@ -121,6 +124,12 @@ class ViewController: UITableViewController,UISearchResultsUpdating {
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let movie = movies[indexPath.row]
+        if recentSearch.count < 10{
+            self.recentSearch.append(movie)
+        }else{
+            recentSearch.remove(at: 0)
+            self.recentSearch.append(movie)
+        }
         performSegue(withIdentifier: "showDetails", sender: movie)
     }
     
